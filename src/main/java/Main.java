@@ -4,5 +4,7 @@ public class Main {
         System.out.println("totalVote = " + dataRetriever.countAllVotes());
         System.out.println("=========================");
         System.out.println(dataRetriever.countVotesByType());
+        System.out.println("=========================");
+        System.out.println(dataRetriever.countValidVotesByCandidate());
     }
 }
