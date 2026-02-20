@@ -91,4 +91,30 @@ public class DataRetriever {
         }
         return result;
     }
+
+    VoteSummary computeVoteSummary() {
+        DBConnection dbConnection = new DBConnection();
+        String sql = """
+                select COUNT(case when v.vote_type = 'VALID' then v.id else null end) as valid_count,
+                       COUNT(case when v.vote_type = 'BLANK' then v.id else null end) as blank_count,
+                       COUNT(case when v.vote_type = 'NULL' then v.id else null end) as null_count
+                from vote v
+                """;
+        VoteSummary result = new VoteSummary();
+
+        try (
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement ps = connection.prepareStatement(sql);
+                ResultSet resultSet = ps.executeQuery()
+        ){
+            if (resultSet.next()){
+                result.setValidCount(resultSet.getInt("valid_count"));
+                result.setBlankCount(resultSet.getInt("blank_count"));
+                result.setNullCount(resultSet.getInt("null_count"));
+            }
+        } catch (SQLException e){
+            throw new RuntimeException("Error executing query", e);
+        }
+        return result;
+    }
 }
