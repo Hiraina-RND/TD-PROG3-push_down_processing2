@@ -117,4 +117,36 @@ public class DataRetriever {
         }
         return result;
     }
+
+    double computeTurnoutRate() {
+        DBConnection dbConnection = new DBConnection();
+        String sql = """
+                select
+                    (
+                        (select count(voter.id)
+                         from voter
+                         inner join vote on vote.voter_id = voter.id
+                        ) * 100
+                    ) / tvr.total_voter as result
+                from (
+                    select count(vr.id) as total_voter
+                    from voter vr
+                ) tvr
+                """;
+        double result = 0.0;
+
+        try (
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement ps = connection.prepareStatement(sql);
+                ResultSet resultSet = ps.executeQuery()
+        ){
+            if (resultSet.next()){
+                result = resultSet.getDouble("result");
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error executing query", e);
+        }
+        return result;
+    }
 }
