@@ -149,4 +149,33 @@ public class DataRetriever {
         }
         return result;
     }
+
+    ElectionResult findWinner(){
+        DBConnection dbConnection = new DBConnection();
+        String sql = """
+                select c.name as candidate_name, count(v.id) as valid_vote_count
+                from candidate c
+                left join vote v on v.candidate_id = c.id
+                    and v.vote_type = 'VALID'
+                group by c.name
+                order by valid_vote_count desc
+                limit 1
+                """;
+        ElectionResult result = new ElectionResult();
+
+        try(
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement ps = connection.prepareStatement(sql);
+                ResultSet resultSet = ps.executeQuery()
+        ){
+            if (resultSet.next()){
+                result.setCandidateName(resultSet.getString("candidate_name"));
+                result.setValidVoteCount(resultSet.getInt("valid_vote_count"));
+            }
+
+        } catch (SQLException e){
+            throw new RuntimeException("Error executing query", e);
+        }
+        return result;
+    }
 }
