@@ -63,10 +63,9 @@ public class DataRetriever {
     List<CandidateVoteCount> countValidVotesByCandidate (){
         DBConnection dbConnection = new DBConnection();
         String sql = """
-                select c.name as candidate_name, count(v.id) as valid_vote
-                from candidate c
-                left join vote v on v.candidate_id = c.id
-                    and v.vote_type = 'VALID'
+                select c.name as candidate_name, count(case when vote_type = 'VALID' then v.id else null end) as valid_vote
+                from vote v
+                join candidate c on c.id = v.candidate_id
                 group by c.name
                 order by valid_vote desc
                 """;
